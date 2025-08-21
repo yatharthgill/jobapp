@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import Card from "../components/Card";
 import axiosInstance from "../axiosInstance";
 const API = "http://localhost:8000";
@@ -30,7 +29,7 @@ export default function App() {
       setJobs([...internshalaJobs, ...linkedinJobs]);
     } catch (err) {
       // console.error(err);
-      setError("Failed to fetch jobs.");
+      setError("Failed to fetch jobs.",err);
     } finally {
       setLoadingJobs(false);
     }
@@ -52,7 +51,7 @@ export default function App() {
       });
       setScrapeTasks((prev) => [...prev, ...data.map((job) => ({ ...job }))]);
     } catch (err) {
-      setError("Failed to start scrape task.");
+      setError("Failed to start scrape task.",err);
       setLoadingScrape(false);
     }
   };
@@ -95,7 +94,7 @@ export default function App() {
       } catch (err) {
         setScrapeTasks("");
         clearInterval(interval);
-        setError("Failed to check scrape status.");
+        setError("Failed to check scrape status.",err);
         setLoadingScrape(false);
       }
     }, 2000);
