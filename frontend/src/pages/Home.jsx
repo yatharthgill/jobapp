@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Card from "../components/Card";
 import axiosInstance from "../axiosInstance";
-const API = "http://localhost:8000";
+
+const API = import.meta.env.VITE_BACKEND_URL;
 
 export default function App() {
   const [jobRole, setJobRole] = useState("engineering");

@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     GITHUB_TOKEN: str
     SECRET_KEY: str
-    JWT_EXPIRE_MINUTES: int = 1440
+    JWT_EXPIRE_DAYS: int 
     MONGO_URI: str
     DB_NAME: str
     FIREBASE_CREDENTIALS_PATH: str
