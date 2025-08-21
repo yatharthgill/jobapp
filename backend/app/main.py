@@ -1,33 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import jobs, tasks, resumes, email
-from .db.db import connect_to_mongo, close_mongo_connection, db
+from .routers import jobs, tasks, resume, profiles, ats, suggest, auth, agents
 
 app = FastAPI(title="JobApp API")
 
 
 
+# Routers
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+app.include_router(agents.router, prefix="/agents", tags=["Agents"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
 app.include_router(tasks.router, prefix="/tasks", tags=["Tasks"])
-app.include_router(resumes.router, prefix="/resumes", tags=["Resumes"])
-app.include_router(email.router, prefix="/email", tags=["Email"])
+app.include_router(resume.router, prefix="/resume", tags=["Resume"])
+app.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
+app.include_router(ats.router, prefix="/ats", tags=["ATS"])
+app.include_router(suggest.router, prefix="/suggest", tags=["Suggestions"])
 
+
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TEMP for development
+    allow_origins=["http://localhost:5173"],  # TEMP: Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-async def startup_event():
-    await connect_to_mongo()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    await close_mongo_connection()
-
+# Health check
 @app.get("/")
 def health():
     return {"status": "ok"}
