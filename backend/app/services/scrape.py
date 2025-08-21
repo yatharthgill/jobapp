@@ -21,7 +21,7 @@ async def check_scrape_status(project: str, jobid: str):
             return {"status": "not_found", "job": None}
 
 
-async def schedule_scrape(project: str, spider: str, domain: str, location: str):
+async def schedule_scrape(project: str, spider: str, domain: str, location: str , user_id: str):
     """
     Schedule a Scrapy spider via Scrapyd.
     Returns the jobid if successfully scheduled, else None.
@@ -31,19 +31,25 @@ async def schedule_scrape(project: str, spider: str, domain: str, location: str)
         "project": project,
         "spider": spider,
         "domain": domain,
-        "location": location
+        "location": location,
+        "user_id": user_id
     }
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(schedule_url, data=payload) as resp:
-            if resp.status != 200:
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(schedule_url, data=payload) as resp:
                 text = await resp.text()
-                print(f"Scrapyd schedule error: {resp.status}, {text}")
-                return None
+                if resp.status != 200:
+                    print(f"Scrapyd schedule error: {resp.status}, {text}")
+                    return None
 
-            data = await resp.json()
-            if data.get("status") == "ok" and "jobid" in data:
-                return data
-            else:
-                print(f"Scrapyd failed to schedule: {data}")
-                return None
+                data = await resp.json()
+                jobid = data.get("jobid")
+                if data.get("status") == "ok" and jobid:
+                    return {"jobid": jobid}
+                else:
+                    print(f"Scrapyd failed to schedule '{spider}': {data}")
+                    return None
+    except Exception as e:
+        print(f"Exception while scheduling '{spider}': {e}")
+        return None
