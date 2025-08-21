@@ -2,24 +2,13 @@ from fastapi import APIRouter, Response
 from datetime import datetime
 from app.schemas.user_schema import Token
 from app.db.mongodb import db
-from app.core.firebase_config import firebase_admin
-from firebase_admin import auth as firebase_auth
+from firebase_admin import auth as firebase_auth # type: ignore
 from app.utils.api_response import api_response
-from app.utils.jwt_handler import create_access_token
+from app.utils.jwt_handler import create_access_token ,set_token_cookie
+
 
 router = APIRouter()
 users_collection = db["users"]
-
-# Helper to set cookie
-def set_token_cookie(response: Response, token: str):
-    response.set_cookie(
-        key="appToken",
-        value=token,
-        httponly=True,   # prevents JS access
-        secure=False,    # set True in production with HTTPS
-        samesite="lax",
-        max_age=3600     # 1 hour
-    )
 
 # Signup
 @router.post("/signup")
@@ -85,3 +74,14 @@ async def login(token: Token, response: Response):
             data={"error": str(e)},
             status_code=400
         )
+
+@router.post("/logout")
+def logout(response: Response):
+    """
+    Logout user by clearing the auth cookie
+    """
+    response.delete_cookie(key="appToken", path="/")
+    return api_response(
+        message="Logout Successfull!",
+        status_code=200
+    )

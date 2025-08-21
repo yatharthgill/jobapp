@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request , Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from app.db.mongodb import db
@@ -9,16 +9,25 @@ from typing import Dict, Any
 # HTTPBearer is better than OAuth2PasswordBearer for JWT-only auth
 bearer_scheme = HTTPBearer(auto_error=True)
 
-def create_access_token(data: dict, expires_delta: int = settings.JWT_EXPIRE_MINUTES) -> str:
+def create_access_token(data: dict, expires_delta: int = settings.JWT_EXPIRE_DAYS) -> str:
     """
     Create a JWT token for backend authentication.
     """
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=expires_delta)
+    expire = datetime.now(timezone.utc) + timedelta(days=expires_delta)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 
+def set_token_cookie(response: Response, token: str):
+    response.set_cookie(
+        key="appToken",
+        value=token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        max_age=30*24*3600
+    )
 
 async def get_current_user(request: Request) -> Dict[str, Any]:
     """
