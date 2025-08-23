@@ -3,20 +3,32 @@ import React, { useState, useEffect } from "react";
 import AuthContext from "./AuthContext";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
+import Cookies from "js-cookie";
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  // Track Firebase auth state
+
+  // Read user from cookie initially
+  const [user, setUser] = useState(() => {
+    const savedUser = Cookies.get("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [loading, setLoading] = useState(user ? false : true);
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
       setUser(firebaseUser);
+      if (firebaseUser) {
+        Cookies.set("user", JSON.stringify(firebaseUser), { expires: 7 }); // expires in 7 days
+      } else {
+        Cookies.remove("user");
+      }
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
 
   // Firebase logout
   const logoutFirebase = async () => {
@@ -46,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     await logoutFirebase();
     await logoutBackend();
     setUser(null);
+    Cookies.remove("user");
     window.location.href = "/auth/login";
     };
 

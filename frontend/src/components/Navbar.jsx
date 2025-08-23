@@ -12,6 +12,7 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useAuth } from "@/context/useAuth";
+import { Link } from "react-router-dom";
 
 
 export default function NavbarDemo({ children }) {
@@ -69,14 +70,14 @@ export default function NavbarDemo({ children }) {
             onClose={() => setIsMobileMenuOpen(false)}
           >
             {navItems.map((item, idx) => (
-              <a
+              <Link
                 key={`mobile-link-${idx}`}
-                href={item.link}
+                to={item.link}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="relative text-neutral-600"
               >
                 <span className="block">{item.name}</span>
-              </a>
+              </Link>
             ))}
 
             <div className="flex w-full flex-col gap-4 mt-4">

@@ -1,8 +1,7 @@
 // src/components/Layout.jsx
 import React from "react";
 import NavbarDemo from "./Navbar";
-import { ThemeProvider } from "./theme-provider";
-// import Footer from "./Footer";
+import Footer from "./Footer";
 
 const Layout = ({ children }) => {
   return (
@@ -11,7 +10,7 @@ const Layout = ({ children }) => {
       <NavbarDemo >
       {children}
       </NavbarDemo>
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 };
