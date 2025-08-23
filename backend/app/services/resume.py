@@ -1,5 +1,3 @@
-# app/services/resume_service.py
-
 from app.db.mongodb import db
 
 resume_collection = db["resumes"]

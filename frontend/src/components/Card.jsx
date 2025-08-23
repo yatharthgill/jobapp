@@ -1,128 +1,82 @@
-import React from "react";
-import styled from "styled-components";
+import React, { useRef, useEffect } from 'react';
 
-const Card = ({ id, source, url, title, company, location, salary, published}) => {
+// --- HELPER COMPONENTS ---
+
+// Location Pin Icon
+const LocationIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 flex-shrink-0">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const CompanyLogo = ({ company }) => (
+    <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
+        <span className="text-xl font-bold text-gray-600">{company.charAt(0)}</span>
+    </div>
+);
+
+// --- JOB CARD COMPONENT ---
+const Card = ({ source, url, title, company, location, salary, published }) => {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const handleMouseMove = (e) => {
+      const { width, height, left, top } = card.getBoundingClientRect();
+      const x = e.clientX - left;
+      const y = e.clientY - top;
+      const rotateX = ((y / height) - 0.5) * -16;
+      const rotateY = ((x / width) - 0.5) * 16;
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
+    };
+    const handleMouseLeave = () => {
+      card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    };
+    card.addEventListener('mousemove', handleMouseMove);
+    card.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      card.removeEventListener('mousemove', handleMouseMove);
+      card.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  const sourceInfo = {
+    linkedin: { text: 'LinkedIn', bg: 'bg-blue-100', textColor: 'text-blue-800' },
+    indeed: { text: 'Indeed', bg: 'bg-green-100', textColor: 'text-green-800' }
+  };
+  const currentSource = sourceInfo[source.toLowerCase()] || { text: source.charAt(0).toUpperCase() + source.slice(1).toLowerCase(), bg: 'bg-gray-100', textColor: 'text-gray-800' };
+
   return (
-    <StyledWrapper>
-      <div className="card">
-        <span
-          className={`card-badge ${
-            source === "linkedin" ? "bg-blue-500" : "bg-green-500"
-          }`}
-        >
-          {" "}
-          {source.charAt(0).toUpperCase() + source.slice(1).toLowerCase()}
-        </span>
-        <div className="card-details">
-          <p className="text-title">{title}</p>
-          <p className="text-body">
-           Company:- {company}
-          </p>
-          {salary && <p className="text-body">Salary: {salary}</p>}
-          <p className="text-location">
-            <span className="location-icon">Location📍:-</span>
-            {location}
-          </p>
-          {published && <p className="text-date text-green-600 text-bold">
-            Published: {new Date(published).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </p>}
+    <div ref={cardRef} className="group relative bg-white border border-gray-200 rounded-xl shadow-sm transition-all duration-300 ease-out will-change-transform" style={{ transformStyle: 'preserve-3d' }}>
+      <div className="absolute inset-0 rounded-xl bg-[radial-gradient(circle_at_50%_50%,rgba(96,165,250,0.15),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <div className="relative p-5 flex flex-col h-full">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <CompanyLogo company={company} />
+            <div>
+              <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+              <p className="text-gray-600 font-medium">{company}</p>
+            </div>
+          </div>
+          <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${currentSource.bg} ${currentSource.textColor}`}>{currentSource.text}</span>
         </div>
-        <button className="card-button">
-          <a href={url} target="_blank">Apply Now</a>
-        </button>
+        <div className="flex-grow space-y-3 mb-4">
+          {salary && <p className="text-sm text-green-600 font-semibold">{salary}</p>}
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <LocationIcon />
+            <span>{location}</span>
+          </div>
+        </div>
+        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+          {published && <p className="text-xs text-gray-400">Posted: {new Date(published).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>}
+          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white px-4 py-2 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Apply Now</a>
+        </div>
       </div>
-    </StyledWrapper>
+    </div>
   );
 };
 
-const StyledWrapper = styled.div`
-  .card {
-    width: 190px;
-    height: auto;
-    border-radius: 20px;
-    background: #f5f5f5;
-    position: relative;
-    padding: 1.8rem;
-    border: 2px solid #c3c6ce;
-    transition: 0.5s ease-out;
-    overflow: visible;
-  }
 
-  .card-badge {
-    display: inline-block;
-    color: #fff;
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 1rem;
-    align-self: flex-start;
-  }
-
-  .card-details {
-    color: black;
-    height: 100%;
-    gap: 0.5em;
-    display: grid;
-    place-content: center;
-  }
-
-  .text-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #003366;
-  }
-
-  .text-body {
-    font-size: 0.9rem;
-    color: #555;
-  }
-  
-  .text-date{
-      font-size: 0.85rem;
-}
-
-  .text-location {
-    font-size: 0.85rem;
-    color: #008bf8;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-weight: 500;
-  }
-
-  .location-icon {
-    font-size: 0.9rem;
-  }
-
-  .card-button {
-    transform: translate(-50%, 125%);
-    width: 60%;
-    border-radius: 1rem;
-    border: none;
-    background-color: #008bf8;
-    color: #fff;
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    opacity: 0;
-    transition: 0.3s ease-out;
-  }
-
-  .card:hover {
-    border-color: #008bf8;
-    box-shadow: 0 4px 18px 0 rgba(0, 0, 0, 0.25);
-  }
-
-  .card:hover .card-button {
-    transform: translate(-50%, 50%);
-    opacity: 1;
-  }
-`;
-
-export default Card;
+export default Card

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/axiosInstance";
 import { FileUpload } from "@/components/ui/file-upload";
+import ATSSuggestions from "@/components/AtsSuggestions";
 
 const Resume = ({ onUploadSuccess }) => {
   const [response, setResponse] = useState(null);
@@ -31,12 +32,12 @@ const Resume = ({ onUploadSuccess }) => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await axiosInstance.post(`${API}/resume/upload`, formData, {
+      const res = await axiosInstance.post(`resume/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const parse_res = await axiosInstance.post(`${API}/resume/parse`);
-      const profile = await axiosInstance.post(`${API}/profiles/create`);
+      const parse_res = await axiosInstance.post(`resume/parse`);
+      const profile = await axiosInstance.post(`profiles/create`);
 
       console.log("Upload response:", res.data);
       console.log("Resume Parsed", parse_res.data);
@@ -57,8 +58,8 @@ const Resume = ({ onUploadSuccess }) => {
 
   const fetchdata = async () => {
     try {
-      const res = await axiosInstance.get(`${API}/resume/resumes`);
-      console.log(res.data);
+      const res = await axiosInstance.get(`/resume/resumes`);
+      // console.log(res.data);
 
       if (!res.data?.data || res.data.data.length === 0) {
         setResponse(""); // no resume found
@@ -84,15 +85,10 @@ const Resume = ({ onUploadSuccess }) => {
             <FileUpload onChange={handleFileUpload} />
           </div>
         </>
-      ) : response ? (
+      ) :  (
         <div className="container mx-auto">
-          <h2>Your Resume Data</h2>
-          <pre className="whitespace-pre-wrap break-words">
-            {JSON.stringify(response, null, 2)}
-          </pre>
+          <ATSSuggestions/>
         </div>
-      ) : (
-        <p>Loading...</p>
       )}
     </div>
   );
