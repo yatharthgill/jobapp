@@ -9,8 +9,8 @@ class MongoDBPipeline:
     @classmethod
     def from_crawler(cls, crawler):
         return cls(
-            mongo_uri=crawler.settings.get('MONGO_URI', 'mongodb://localhost:27017'),
-            mongo_db=crawler.settings.get('MONGO_DATABASE', 'jobsapp')
+            mongo_uri='mongodb+srv://yatharthchaudhary05:yatharth05@cluster0.tstdfjz.mongodb.net/',
+            mongo_db='jobsapp'
         )
 
     def open_spider(self, spider):

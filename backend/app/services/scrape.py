@@ -41,6 +41,7 @@ async def schedule_scrape(project: str, spider: str, domain: str, location: str 
             async with session.post(schedule_url, data=payload) as resp:
                 text = await resp.text()
                 if resp.status != 200:
+                    print(resp)
                     print(f"Scrapyd schedule error: {resp.status}, {text}")
                     return None
 
