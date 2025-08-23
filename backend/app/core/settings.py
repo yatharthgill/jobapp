@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     MONGO_URI: str
     DB_NAME: str
     FIREBASE_CREDENTIALS_PATH: str
+    SCRAPYD_BASE_URL:str
     GROQ_API_KEY : str
 
     class Config:
