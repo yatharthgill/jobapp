@@ -1,6 +1,7 @@
 import aiohttp
+from app.core.settings import settings
 
-SCRAPYD_BASE_URL = "http://localhost:6800"
+SCRAPYD_BASE_URL = settings.SCRAPYD_BASE_URL
 
 async def check_scrape_status(project: str, jobid: str):
     listjobs_url = f"{SCRAPYD_BASE_URL}/listjobs.json"
