@@ -3,12 +3,16 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  sendEmailVerification,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 
 import { auth, googleProvider, githubProvider } from "../firebase";
 import axios from "axios";
 import { EyeIcon, EyeClosedIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/useAuth";
+import toast from "react-hot-toast";
 // --- Helper Components ---
 
 // Icon for Google
@@ -55,35 +59,56 @@ const GithubIcon = () => (
 
 // --- Main App Component ---
 export default function Auth({ isLogin: initialIsLogin = true }) {
+  const { logout } = useAuth();
   const [isLogin, setIsLogin] = useState(initialIsLogin);
   const navigate = useNavigate();
   // State for form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [notification, setNotification] = useState({ message: "", type: "" });
 
   const API = import.meta.env.VITE_BACKEND_URL;
+  // --- Error Mapper ---
+  const getAuthErrorMessage = (error) => {
+    const errorCode = error.code;
 
-  useEffect(() => {
-    // Clear notification after 3 seconds
-    if (notification.message) {
-      const timer = setTimeout(() => {
-        setNotification({ message: "", type: "" });
-      }, 3000);
-      return () => clearTimeout(timer);
+    switch (errorCode) {
+      case "auth/invalid-credential":
+      case "auth/user-not-found":
+        return "Invalid Credentials.";
+      case "auth/wrong-password. Please try again.":
+        return "Invalid Credentials. Please try again.";
+      case "auth/email-already-in-use":
+        return "This email is already registered. Please login instead.";
+      case "auth/weak-password":
+        return "Password is too weak. Please use a stronger one.";
+      case "auth/too-many-requests":
+        return "Too many failed attempts. Try again later.";
+      case "auth/network-request-failed":
+        return "Network error. Please check your internet connection.";
+      case "auth/popup-closed-by-user":
+        return "The login popup was closed before completing sign in.";
+      default:
+        return "Something went wrong. Please try again.";
     }
-  }, [notification]);
+  };
 
-  // Function to display notifications
-  const showNotification = (message, type) => {
-    setNotification({ message, type });
+  // --- Success Mapper ---
+  const getAuthSuccessMessage = (action, provider) => {
+    if (provider) {
+      return `${
+        action === "login" ? "Login" : "Signup"
+      } with ${provider} successful!`;
+    }
+    return action === "login"
+      ? "Login successful! Redirecting..."
+      : "Signup successful! Please verify your email before logging in.";
   };
 
   // --- Authentication Handlers ---
-
   const handleEmailAuth = async (e) => {
     e.preventDefault();
+
     if (isLogin) {
       // Login Logic
       try {
@@ -92,15 +117,34 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
           email,
           password
         );
-        const idToken = await userCredential.user.getIdToken();
-        await axios.post(
-          `${API}/auth/login`,
-          { token: idToken },
-          { withCredentials: true }
-        );
-        showNotification("Login successful!", "success");
+
+        const user = userCredential.user;
+
+        if (user.emailVerified) {
+          const idToken = await user.getIdToken();
+
+          const login_res = await axios.post(
+            `${API}/auth/login`,
+            { token: idToken },
+            { withCredentials: true }
+          );
+
+          if (login_res.data.status !== 200) {
+            toast.error(login_res.data.message || "Login failed");
+            await logout();
+          } else {
+            toast.success(getAuthSuccessMessage("login"));
+              navigate("/");
+          }
+        } else {
+          await sendEmailVerification(user);
+          await logout();
+          toast.error(
+            "Email not verified. A verification link has been sent to your email."
+          );
+        }
       } catch (error) {
-        showNotification(error.message, "error");
+        toast.error(getAuthErrorMessage(error));
       }
     } else {
       // Signup Logic
@@ -110,12 +154,22 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
           email,
           password
         );
-        const idToken = await userCredential.user.getIdToken();
-        await axios.post(`${API}/auth/signup`, { token: idToken });
-        showNotification("Signup successful! Please log in.", "success");
-        setIsLogin(true); // Switch to login form after successful signup
+        const user = userCredential.user;
+
+        await sendEmailVerification(user);
+
+        const idToken = await user.getIdToken();
+        await axios.post(
+          `${API}/auth/signup`,
+          { token: idToken },
+          { withCredentials: true }
+        );
+
+        toast.success(getAuthSuccessMessage("signup"));
+        setIsLogin(true);
+        logout()
       } catch (error) {
-        showNotification(error.message, "error");
+        toast.error(getAuthErrorMessage(error));
       }
     }
   };
@@ -123,42 +177,38 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
   const handleSocialAuth = async (provider) => {
     const providerName = provider === googleProvider ? "Google" : "GitHub";
     const authAction = isLogin ? "login" : "signup";
+
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
-      const res = await axios.post(
+      await axios.post(
         `${API}/auth/${authAction}`,
         { token: idToken },
         { withCredentials: true }
       );
 
-      if (res.data?.data?.token) {
-        console.log("App JWT:", res.data.data.token);
-      }
-
-      showNotification(
-        `${isLogin ? "Login" : "Signup"} with ${providerName} successful!`,
-        "success"
-      );
+      toast.success(getAuthSuccessMessage(authAction, providerName));
+      navigate("/");
     } catch (error) {
-      showNotification(error.message, "error");
+      toast.error(getAuthErrorMessage(error));
     }
   };
 
+  const handlePasswordReset = async () => {
+    try {
+      if (!email) {
+        toast.error("Please enter your email to reset password.");
+        return;
+      }
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Password reset link sent! Please check your inbox.");
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error));
+    }
+  };
   // --- Render ---
   return (
     <div className="font-sans text-gray-900 bg-gray-50 flex justify-center p-4 min-h-screen relative">
-      {/* Notification Popup */}
-      {notification.message && (
-        <div
-          className={`fixed top-5 right-5 p-4 rounded-lg shadow-lg text-white transition-transform transform ${
-            notification.type === "success" ? "bg-green-500" : "bg-red-500"
-          } ${notification.message ? "translate-x-0" : "translate-x-full"}`}
-        >
-          {notification.message}
-        </div>
-      )}
-
       <div className="w-full max-w-md" style={{ perspective: "1000px" }}>
         <div
           className={`relative w-full h-full transition-transform duration-700 ease-in-out`}
@@ -226,6 +276,17 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
                 Log In
               </button>
             </form>
+
+            <div className="flex justify-end mt-2">
+              <button
+                type="button"
+                className="text-sm text-blue-700 hover:underline focus:outline-none"
+                onClick={handlePasswordReset}
+                aria-label="Forgot Password"
+              >
+                Forgot Password?
+              </button>
+            </div>
 
             <div className="my-6 flex items-center">
               <div className="flex-grow border-t border-gray-300"></div>

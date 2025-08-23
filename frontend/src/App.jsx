@@ -7,11 +7,14 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import { ThemeProvider } from "./components/theme-provider";
+import Resume from "./pages/Resume";
+import Profile from "./pages/Profile";
+import { Toaster } from "react-hot-toast";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div>Loading...</div>;
-  return user ? children : <Navigate to="/auth" replace />;
+  return user ? children : <Navigate to="/auth/login" replace />;
 };
 
 const AuthRoute = ({ children }) => {
@@ -25,6 +28,7 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
     <AuthProvider>
       <Router>
+        <Toaster position="top-center" reverseOrder={false} />
         <Routes>
           {/* Public pages */}
           <Route
@@ -40,31 +44,41 @@ function App() {
           <Route
             path="/auth/login"
             element={
-              <AuthRoute>
+              // <AuthRoute>
                 <Layout>
                 <Auth isLogin={true} />
                 </Layout>
-              </AuthRoute>
+              // </AuthRoute>
             }
           />
           <Route
             path="/auth/signup"
             element={
-              <AuthRoute>
+              // <AuthRoute>
                 <Layout>
                 <Auth isLogin={false} />
                 </Layout>
-              </AuthRoute>
+              // </AuthRoute>
             }
           />
 
           {/* Protected route example */}
           <Route
-            path="/dashboard"
+            path="/resume"
             element={
               <ProtectedRoute>
                 <Layout>
-                  <h1>Dashboard - Only for logged-in users</h1>
+                  <Resume/>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Profile/>
                 </Layout>
               </ProtectedRoute>
             }
