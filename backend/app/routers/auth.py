@@ -2,10 +2,10 @@ from fastapi import APIRouter, Response
 from datetime import datetime
 from app.schemas.user_schema import Token
 from app.db.mongodb import db
-from firebase_admin import auth as firebase_auth # type: ignore
+from firebase_admin import auth as firebase_auth 
 from app.utils.api_response import api_response
 from app.utils.jwt_handler import create_access_token ,set_token_cookie
-
+from app.core import firebase_config
 
 router = APIRouter()
 users_collection = db["users"]
@@ -50,6 +50,7 @@ async def signup(token: Token, response: Response):
 async def login(token: Token, response: Response):
     try:
         decoded_token = firebase_auth.verify_id_token(token.token)
+        print(decoded_token["uid"])
         uid = decoded_token["uid"]
         email = decoded_token.get("email")
         provider = decoded_token.get("firebase", {}).get("sign_in_provider", "email")

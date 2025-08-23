@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
     await logoutFirebase();
     await logoutBackend();
     setUser(null);
-    window.location.href = "/auth"; // redirect to login/auth page
-  };
+    window.location.href = "/auth/login";
+    };
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, logout }}>

@@ -126,7 +126,7 @@ export default function NavbarDemo({ children }) {
         </MobileNav>
       </Navbar>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 container mx-auto">{children}</main>
     </div>
   );
 }

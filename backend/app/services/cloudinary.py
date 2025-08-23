@@ -8,12 +8,15 @@ cloudinary.config(
     api_secret = "njBl3E9CHTy4Syz8NX8JVqzOcSc" 
 )
 
-def upload_resume(file: UploadFile):
+def upload_resume(file: UploadFile, user_id: str):
+    public_id = f"{user_id}_{file.filename.rsplit('.', 1)[0]}"
     return cloudinary.uploader.upload(
         file.file,
         resource_type="raw",
         folder="resumes",
-        public_id=file.filename.rsplit(".", 1)[0],
-        use_filename=True,       
-        unique_filename=False       
+        public_id=public_id,
+        use_filename=True,
+        unique_filename=False,
+        overwrite=True
     )
+
