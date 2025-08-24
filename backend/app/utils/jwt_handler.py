@@ -24,8 +24,8 @@ def set_token_cookie(response: Response, token: str):
         key="appToken",
         value=token,
         httponly=True,
-        secure=False,
-        samesite="lax",
+        secure=True,
+        samesite="none",
         max_age=30*24*3600
     )
 
