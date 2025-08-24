@@ -19,7 +19,7 @@ app.include_router(suggest.router, prefix="/suggest", tags=["Suggestions"])
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://aijobapp.netlify.app/"],  # TEMP: Allow all origins for development
+    allow_origins=["http://localhost:5173","https://aijobapp.netlify.app"],  # TEMP: Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
