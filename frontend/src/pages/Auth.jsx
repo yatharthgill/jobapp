@@ -13,6 +13,7 @@ import { EyeIcon, EyeClosedIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/useAuth";
 import toast from "react-hot-toast";
+import axiosInstance from "@/axiosInstance";
 // --- Helper Components ---
 
 // Icon for Google
@@ -123,10 +124,9 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
         if (user.emailVerified) {
           const idToken = await user.getIdToken();
 
-          const login_res = await axios.post(
-            `${API}/auth/login`,
+          const login_res = await axiosInstance.post(
+            '/auth/login',
             { token: idToken },
-            { withCredentials: true }
           );
 
           if (login_res.data.status !== 200) {
@@ -159,10 +159,9 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
         await sendEmailVerification(user);
 
         const idToken = await user.getIdToken();
-        await axios.post(
-          `${API}/auth/signup`,
-          { token: idToken },
-          { withCredentials: true }
+        await axiosInstance.post(
+          '/auth/signup',
+          { token: idToken }
         );
 
         toast.success(getAuthSuccessMessage("signup"));
@@ -182,7 +181,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
       await axios.post(
-        `${API}/auth/${authAction}`,
+        `${API}auth/${authAction}`,
         { token: idToken },
         { withCredentials: true }
       );

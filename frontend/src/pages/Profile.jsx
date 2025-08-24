@@ -31,7 +31,7 @@ const Profile = () => {
   const fetchProfileData = async () => {
     try {
       const response = await axiosInstance.get(
-        "http://localhost:8000/profiles/me"
+        "/profiles/me"
       );
       if (!response) {
         throw new Error("Network response was not ok");
