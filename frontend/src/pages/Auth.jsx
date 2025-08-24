@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,8 +8,7 @@ import {
 } from "firebase/auth";
 
 import { auth, googleProvider, githubProvider } from "../firebase";
-import axios from "axios";
-import { EyeIcon, EyeClosedIcon } from "lucide-react";
+import { EyeIcon, EyeClosedIcon, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/useAuth";
 import toast from "react-hot-toast";
@@ -67,6 +66,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const API = import.meta.env.VITE_BACKEND_URL;
   // --- Error Mapper ---
@@ -102,53 +102,49 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
       } with ${provider} successful!`;
     }
     return action === "login"
-      ? "Login successful! Redirecting..."
+      ? "Login successful"
       : "Signup successful! Please verify your email before logging in.";
   };
 
   // --- Authentication Handlers ---
   const handleEmailAuth = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    if (isLogin) {
-      // Login Logic
-      try {
+    try {
+      if (isLogin) {
+        // --- Login Logic ---
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
           password
         );
-
         const user = userCredential.user;
 
-        if (user.emailVerified) {
-          const idToken = await user.getIdToken();
-
-          const login_res = await axiosInstance.post(
-            '/auth/login',
-            { token: idToken },
-          );
-
-          if (login_res.data.status !== 200) {
-            toast.error(login_res.data.message || "Login failed");
-            await logout();
-          } else {
-            toast.success(getAuthSuccessMessage("login"));
-              navigate("/");
-          }
-        } else {
+        if (!user.emailVerified) {
           await sendEmailVerification(user);
           await logout();
           toast.error(
             "Email not verified. A verification link has been sent to your email."
           );
+          return;
         }
-      } catch (error) {
-        toast.error(getAuthErrorMessage(error));
-      }
-    } else {
-      // Signup Logic
-      try {
+
+        const idToken = await user.getIdToken();
+        const loginRes = await axiosInstance.post("/auth/login", {
+          token: idToken,
+        });
+
+        if (!loginRes.data.success) {
+          toast.error(loginRes.data.message || "Login failed");
+          await logout();
+          return;
+        }
+
+        toast.success(getAuthSuccessMessage("login"));
+        navigate("/");
+      } else {
+        // --- Signup Logic ---
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
@@ -157,31 +153,32 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
         const user = userCredential.user;
 
         await sendEmailVerification(user);
-
         const idToken = await user.getIdToken();
-        await axiosInstance.post(
-          '/auth/signup',
-          { token: idToken }
-        );
+
+        await axiosInstance.post("/auth/signup", { token: idToken });
 
         toast.success(getAuthSuccessMessage("signup"));
         setIsLogin(true);
-        logout()
-      } catch (error) {
-        toast.error(getAuthErrorMessage(error));
+        await logout(); // Ensure user logs out after signup
       }
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSocialAuth = async (provider) => {
+    setLoading(true);
     const providerName = provider === googleProvider ? "Google" : "GitHub";
     const authAction = isLogin ? "login" : "signup";
 
     try {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
-      await axios.post(
-        `${API}auth/${authAction}`,
+
+      await axiosInstance.post(
+        `/auth/${authAction}`,
         { token: idToken },
         { withCredentials: true }
       );
@@ -190,21 +187,25 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
       navigate("/");
     } catch (error) {
       toast.error(getAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePasswordReset = async () => {
+    if (!email) {
+      toast.error("Please enter your email to reset password.");
+      return;
+    }
+
     try {
-      if (!email) {
-        toast.error("Please enter your email to reset password.");
-        return;
-      }
       await sendPasswordResetEmail(auth, email);
       toast.success("Password reset link sent! Please check your inbox.");
     } catch (error) {
       toast.error(getAuthErrorMessage(error));
     }
   };
+
   // --- Render ---
   return (
     <div className="font-sans text-gray-900 bg-gray-50 flex justify-center p-4 min-h-screen relative">
@@ -269,15 +270,25 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
                 </div>
               </div>
               <button
+                disabled={loading}
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                className={`w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 
+    text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out 
+    transform hover:scale-105 ${
+      loading ? "opacity-70 cursor-not-allowed" : ""
+    }`}
               >
-                Log In
+                {loading ? (
+                  <Loader2 className="animate-spin w-5 h-5" />
+                ) : (
+                  "Log In"
+                )}
               </button>
             </form>
 
             <div className="flex justify-end mt-2">
               <button
+                disabled={loading}
                 type="button"
                 className="text-sm text-blue-700 hover:underline focus:outline-none"
                 onClick={handlePasswordReset}
@@ -295,6 +306,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
 
             <div className="flex flex-col space-y-3">
               <button
+                disabled={loading}
                 onClick={() => handleSocialAuth(googleProvider)}
                 className="flex items-center justify-center w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-300"
               >
@@ -302,6 +314,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
                 <span className="ml-3">Continue with Google</span>
               </button>
               <button
+                disabled={loading}
                 onClick={() => handleSocialAuth(githubProvider)}
                 className="flex items-center justify-center w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
               >
@@ -313,6 +326,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
             <p className="text-center text-sm text-gray-500 mt-8">
               Don't have an account?{" "}
               <button
+                disabled={loading}
                 onClick={() => {
                   setIsLogin(false); // flip the card
                   navigate("/auth/signup"); // change the URL
@@ -323,7 +337,6 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
               </button>
             </p>
           </div>
-          
 
           {/* Signup Form */}
           <div className="absolute w-full h-full bg-white rounded-xl shadow-xl p-8 backface-hidden transform rotate-y-180 flex flex-col justify-center">
@@ -378,10 +391,19 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
                 </div>
               </div>
               <button
+                disabled={loading}
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
+                className={`w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 
+    text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out 
+    transform hover:scale-105 ${
+      loading ? "opacity-70 cursor-not-allowed" : ""
+    }`}
               >
-                Sign Up
+                {loading ? (
+                  <Loader2 className="animate-spin w-5 h-5" />
+                ) : (
+                  "Sign Up"
+                )}
               </button>
             </form>
 
@@ -393,12 +415,14 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
 
             <div className="flex flex-col space-y-3">
               <button
+                disabled={loading}
                 onClick={() => handleSocialAuth(googleProvider)}
                 className="flex items-center justify-center w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-300"
               >
                 <GoogleIcon /> <span className="ml-3">Sign up with Google</span>
               </button>
               <button
+                disabled={loading}
                 onClick={() => handleSocialAuth(githubProvider)}
                 className="flex items-center justify-center w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
               >
@@ -409,6 +433,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
             <p className="text-center text-sm text-gray-500 mt-8">
               Already have an account?{" "}
               <button
+                disabled={loading}
                 onClick={() => {
                   setIsLogin(true);
                   navigate("/auth/login");

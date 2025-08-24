@@ -4,11 +4,13 @@ import AuthContext from "./AuthContext";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import Cookies from "js-cookie";
+import axiosInstance from "@/axiosInstance";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const AuthProvider = ({ children }) => {
-
-
   // Read user from cookie initially
+  const navigate = useNavigate()
   const [user, setUser] = useState(() => {
     const savedUser = Cookies.get("user");
     return savedUser ? JSON.parse(savedUser) : null;
@@ -29,27 +31,22 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-
   // Firebase logout
   const logoutFirebase = async () => {
     try {
       await signOut(auth);
-      console.log("Firebase logged out");
-    } catch (error) {
-      console.error("Firebase logout error:", error);
+    } catch  {
+      toast.error("Firebase logout failed");
     }
   };
 
   // Backend logout (cookie-based)
   const logoutBackend = async () => {
     try {
-      await fetch('http://localhost:8000/auth/logout', {
-        method: "POST",
-        credentials: "include", // include cookies
-      });
-      console.log("Backend session cleared");
-    } catch (error) {
-      console.error("Backend logout error:", error);
+      await axiosInstance.post("/auth/logout");
+      toast.success("Logout Successful");
+    } catch  {
+      toast.error("Backend logout failed");
     }
   };
 
@@ -59,8 +56,8 @@ export const AuthProvider = ({ children }) => {
     await logoutBackend();
     setUser(null);
     Cookies.remove("user");
-    window.location.href = "/auth/login";
-    };
+    navigate('/auth/login')
+  };
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, logout }}>
