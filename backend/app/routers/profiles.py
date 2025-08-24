@@ -115,9 +115,10 @@ async def create_profile(
         if match:
             github_username = match.group(1)
             response = await analyze_github(github_username)
+            # print(response)
             if "error" not in response:
                 profile_dict["github_analysis"] = [response] 
-            else:
+            else:  
                 profile_dict["github_analysis"] = []  
         else:
             profile_dict["github_analysis"] = []  
