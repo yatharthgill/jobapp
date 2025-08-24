@@ -5,6 +5,9 @@ import jwt
 from app.db.mongodb import db
 from app.core.settings import settings
 from typing import Dict, Any
+from app.core.settings import settings
+
+ENV = settings.ENVIRONMENT
 
 
 bearer_scheme = HTTPBearer(auto_error=True)
@@ -20,12 +23,15 @@ def create_access_token(data: dict, expires_delta: int = settings.JWT_EXPIRE_DAY
     return encoded_jwt
 
 def set_token_cookie(response: Response, token: str):
+    secure = True if ENV == "production" else False
+    samesite = "none" if ENV == "production" else "lax"
+
     response.set_cookie(
         key="appToken",
         value=token,
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=secure,
+        samesite=samesite,
         max_age=30*24*3600
     )
 

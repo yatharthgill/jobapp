@@ -49,9 +49,7 @@ async def signup(token: Token, response: Response):
 @router.post("/login")
 async def login(token: Token, response: Response):
     try:
-        print(token.token)
         decoded_token = firebase_auth.verify_id_token(token.token)
-        print(decoded_token["uid"])
         uid = decoded_token["uid"]
         email = decoded_token.get("email")
         provider = decoded_token.get("firebase", {}).get("sign_in_provider", "email")
