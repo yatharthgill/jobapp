@@ -71,7 +71,7 @@ const Card = ({ source, url, title, company, location, salary, published }) => {
         </div>
         <div className="flex justify-between items-center pt-4 border-t border-gray-100">
           {published && <p className="text-xs text-gray-400">Posted: {new Date(published).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>}
-          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white px-4 py-2 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Apply Now</a>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white px-4 py-2 opacity-100 translate-y-0 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Apply Now</a>
         </div>
       </div>
     </div>
