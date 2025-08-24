@@ -19,13 +19,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
+        working-directory: ./newscraper
         run: |
           python -m pip install --upgrade pip
-          pip install scrapy scrapyd-client -r newscraper/requirements.txt
+          pip install -r requirements.txt
 
       - name: Deploy to Scrapyd
         working-directory: ./newscraper/jobscrapper
         env:
           SCRAPYD_URL: https://jobapp-bah2.onrender.com
         run: |
-          scrapyd-deploy -p jobscrapper -v
+          scrapyd-deploy -p jobscrapper -v 4
