@@ -14,7 +14,7 @@ const HeroSection = () => {
   return (
     <section
       id="heroSection"
-      className="relative w-full max-h-screen min-h-[85vh] flex items-center justify-center bg-gray-100 text-gray-800 overflow-hidden p-4"
+      className="relative w-full max-h-screen md:min-h-[85vh] flex items-center justify-center bg-gray-100 text-gray-800 overflow-hidden p-4"
     >
       {/* Particle Background */}
       <div className="absolute inset-0 pointer-events-auto">
