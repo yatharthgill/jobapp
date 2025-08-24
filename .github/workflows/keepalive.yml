@@ -1,18 +1,31 @@
-name: Keep Scrapyd Awake
+name: Scrapyd Deploy
 
 on:
-  push:                      # run on every push
+  push:
     branches:
-      - main                 # (optional) only on main
-  schedule:
-    - cron: "*/12 * * * *"   # every 12 minutes
-  workflow_dispatch:          # allow manual run
+      - main
 
 jobs:
-  ping:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Ping Scrapyd
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
         run: |
-          echo "Pinging Scrapyd at $(date)"
-          curl -s https://jobapp-bah2.onrender.com/daemonstatus.json || echo "Ping failed"
+          python -m pip install --upgrade pip
+          pip install scrapy scrapyd-client -r newscraper/requirements.txt
+
+      - name: Deploy to Scrapyd
+        working-directory: ./newscraper/jobscrapper
+        env:
+          SCRAPYD_URL: https://jobapp-bah2.onrender.com
+        run: |
+          scrapyd-deploy -p jobscrapper -v
