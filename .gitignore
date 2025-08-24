@@ -18,8 +18,8 @@ parts/
 var/
 sdist/
 develop-eggs/
-lib/
-lib64/
+
+
 *.pyc
 *.pyo
 *.pyd
@@ -38,8 +38,7 @@ parts/
 var/
 sdist/
 develop-eggs/
-lib/
-lib64/
+
 *.pyc
 *.pyo
 *.pyd
@@ -58,8 +57,7 @@ parts/
 var/
 sdist/
 develop-eggs/
-lib/
-lib64/
+
 *.pyc
 *.pyo
 *.pyd
@@ -78,8 +76,7 @@ parts/
 var/
 sdist/
 develop-eggs/
-lib/
-lib64/
+
 
 # Node.js
 node_modules/
@@ -195,8 +192,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+
 parts/
 sdist/
 var/
