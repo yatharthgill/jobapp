@@ -1,6 +1,9 @@
 name: Keep Scrapyd Awake
 
 on:
+  push:                      # run on every push
+    branches:
+      - main                 # (optional) only on main
   schedule:
     - cron: "*/12 * * * *"   # every 12 minutes
   workflow_dispatch:          # allow manual run
