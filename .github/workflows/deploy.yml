@@ -28,4 +28,4 @@ jobs:
       - name: Deploy to Scrapyd
         working-directory: ./newscraper/jobscrapper
         run: |
-          scrapyd-deploy jobscrapper -v 4
+          scrapyd-deploy jobscrapper
