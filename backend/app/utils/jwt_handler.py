@@ -6,7 +6,7 @@ from app.db.mongodb import db
 from app.core.settings import settings
 from typing import Dict, Any
 
-# HTTPBearer is better than OAuth2PasswordBearer for JWT-only auth
+
 bearer_scheme = HTTPBearer(auto_error=True)
 
 def create_access_token(data: dict, expires_delta: int = settings.JWT_EXPIRE_DAYS) -> str:

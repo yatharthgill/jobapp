@@ -1,4 +1,3 @@
-import aiohttp
 import re
 from app.utils.text_extract import extract_text
 

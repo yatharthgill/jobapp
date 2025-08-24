@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import jobs, tasks, resume, profiles, ats, suggest, auth, agents
+from .routers import jobs, tasks, resume, profiles, ats, suggest, auth
 
 app = FastAPI(title="JobApp API")
 
@@ -8,11 +8,10 @@ app = FastAPI(title="JobApp API")
 
 # Routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(agents.router, prefix="/agents", tags=["Agents"])
+app.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
+app.include_router(resume.router, prefix="/resume", tags=["Resume"])
 app.include_router(jobs.router, prefix="/jobs", tags=["Jobs"])
 app.include_router(tasks.router, prefix="/tasks", tags=["Tasks"])
-app.include_router(resume.router, prefix="/resume", tags=["Resume"])
-app.include_router(profiles.router, prefix="/profiles", tags=["Profiles"])
 app.include_router(ats.router, prefix="/ats", tags=["ATS"])
 app.include_router(suggest.router, prefix="/suggest", tags=["Suggestions"])
 
