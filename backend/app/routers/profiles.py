@@ -104,6 +104,7 @@ async def create_profile(
     profile_dict["email"] = current_user["email"]
 
     # 3️⃣ GitHub analysis
+# 3️⃣ GitHub analysis
     if profile_dict.get("github_link"):
         github_link = profile_dict["github_link"]
         if not github_link.startswith("http"):
@@ -111,63 +112,64 @@ async def create_profile(
         profile_dict["github_link"] = github_link
 
         match = re.search(r"github\.com/([A-Za-z0-9_-]+)", github_link)
-        if not match:
-            raise HTTPException(status_code=400, detail="Invalid GitHub link")
+        if match:
+            github_username = match.group(1)
+            response = await analyze_github(github_username)
+            if "error" not in response:
+                profile_dict["github_analysis"] = [response] 
+            else:
+                profile_dict["github_analysis"] = []  
+        else:
+            profile_dict["github_analysis"] = []  
 
-        github_username = match.group(1)
-        response = await analyze_github(github_username)
-        if "error" in response:
-            raise HTTPException(status_code=404, detail=response["error"])
-        profile_dict["github_analysis"] = [response]  # ✅ store GitHub analysis as a list
-
-    # 4️⃣ Build ordered dict to preserve field order exactly
-    ordered_profile = OrderedDict(
-        [
-            ("firebase_uid", profile_dict["firebase_uid"]),
-            ("email", profile_dict["email"]),
-            ("first_name", profile_dict.get("first_name")),
-            ("last_name", profile_dict.get("last_name")),
-            ("phone_number", profile_dict.get("phone_number")),
-            ("profile_picture", profile_dict.get("profile_picture")),
-            ("github_link", profile_dict.get("github_link")),
-            ("linkedin_link", profile_dict.get("linkedin_link")),
-            ("bio", profile_dict.get("bio")),
-            ("skills", profile_dict.get("skills") or []),
-            ("experience", profile_dict.get("experience") or []),
-            ("projects", profile_dict.get("projects") or []),
-            ("certifications", profile_dict.get("certifications") or []),
-            ("languages", profile_dict.get("languages") or []),
-            ("education", profile_dict.get("education") or []),
-            ("github_analysis", profile_dict.get("github_analysis") or []),
-            ("created_at", profile_dict.get("created_at") or datetime.now(timezone.utc).isoformat()),
-            ("updated_at", datetime.now(timezone.utc).isoformat())
-        ]
-    )
-
-    # 5️⃣ Upsert into MongoDB
-    try:
-        await profile_collection.update_one(
-            {"firebase_uid": current_user["firebase_uid"]},
-            {"$set": jsonable_encoder(ordered_profile)},
-            upsert=True
+        # 4️⃣ Build ordered dict to preserve field order exactly
+        ordered_profile = OrderedDict(
+            [
+                ("firebase_uid", profile_dict["firebase_uid"]),
+                ("email", profile_dict["email"]),
+                ("first_name", profile_dict.get("first_name")),
+                ("last_name", profile_dict.get("last_name")),
+                ("phone_number", profile_dict.get("phone_number")),
+                ("profile_picture", profile_dict.get("profile_picture")),
+                ("github_link", profile_dict.get("github_link")),
+                ("linkedin_link", profile_dict.get("linkedin_link")),
+                ("bio", profile_dict.get("bio")),
+                ("skills", profile_dict.get("skills") or []),
+                ("experience", profile_dict.get("experience") or []),
+                ("projects", profile_dict.get("projects") or []),
+                ("certifications", profile_dict.get("certifications") or []),
+                ("languages", profile_dict.get("languages") or []),
+                ("education", profile_dict.get("education") or []),
+                ("github_analysis", profile_dict.get("github_analysis") or []),
+                ("created_at", profile_dict.get("created_at") or datetime.now(timezone.utc).isoformat()),
+                ("updated_at", datetime.now(timezone.utc).isoformat())
+            ]
         )
 
-        saved_profile = await profile_collection.find_one(
-            {"firebase_uid": current_user["firebase_uid"]},
-            {"_id": 0}  # exclude MongoDB _id from response
-        )
+        # 5️⃣ Upsert into MongoDB
+        try:
+            await profile_collection.update_one(
+                {"firebase_uid": current_user["firebase_uid"]},
+                {"$set": jsonable_encoder(ordered_profile)},
+                upsert=True
+            )
 
-        return api_response(
-            data=saved_profile,
-            message="User profile created/updated successfully",
-            status_code=200
-        )
+            saved_profile = await profile_collection.find_one(
+                {"firebase_uid": current_user["firebase_uid"]},
+                {"_id": 0}  # exclude MongoDB _id from response
+            )
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error saving profile to database: {str(e)}"
-        )
+            return api_response(
+                data=saved_profile,
+                message="User profile created/updated successfully",
+                status_code=200
+            )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error saving profile to database: {str(e)}"
+            )
 
 @router.get("/me")
 async def get_profile(current_user: dict = Depends(get_current_user)):
