@@ -148,9 +148,8 @@ export default function App() {
       try {
         // GET ATS score
         const response_ats = await axiosInstance.get(
-          "http://localhost:8000/ats/score"
+          "/ats/score"
         );
-        console.log(response_ats.data.success)
         if(response_ats.data.success){
         setAtsResult(response_ats.data.data)
         }
@@ -161,7 +160,7 @@ export default function App() {
 
         // GET suggestions
         const response_suggestions = await axiosInstance.get(
-          "http://localhost:8000/ats/suggest"
+          "/ats/suggest"
         );
         if(response_suggestions.data.success){
         setSuggestions(response_suggestions.data.data.suggestions);
@@ -190,7 +189,7 @@ export default function App() {
     setAtsResult(null);
     try {
       const response = await axiosInstance.post(
-        "http://localhost:8000/ats/score",
+        "/ats/score",
         { job_description: jobDescription }
       );
       setAtsResult(response.data.data);
@@ -211,9 +210,8 @@ export default function App() {
     setSuggestions(null);
     try {
       const response = await axiosInstance.post(
-        "http://localhost:8000/ats/suggest"
+        "/ats/suggest"
       );
-      console.log(response.data.data.suggestions);
       setSuggestions(response.data.data.suggestions);
     } catch (err) {
       setError(

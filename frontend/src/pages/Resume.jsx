@@ -1,4 +1,3 @@
-// Resume.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "@/axiosInstance";
 import { FileUpload } from "@/components/ui/file-upload";
@@ -17,17 +16,15 @@ const Resume = ({ onUploadSuccess }) => {
 
       if (!file) return;
 
-      // 🔹 Prevent re-upload of the same file
+
       if (
         uploadedFile &&
         uploadedFile.name === file.name &&
         uploadedFile.size === file.size
       ) {
-        console.log("File already uploaded, skipping...");
         return;
       }
 
-      console.log("Uploading file:", file);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -39,35 +36,26 @@ const Resume = ({ onUploadSuccess }) => {
       const parse_res = await axiosInstance.post(`resume/parse`);
       const profile = await axiosInstance.post(`profiles/create`);
 
-      console.log("Upload response:", res.data);
-      console.log("Resume Parsed", parse_res.data);
-      console.log("Profile Created Successfully", profile.data);
-
-      // Save uploaded file reference
       setUploadedFile(file);
 
-      // refresh data after upload
       fetchdata();
 
-      // ✅ Close the dialog after success
       if (onUploadSuccess) onUploadSuccess();
-    } catch (error) {
-      console.error("Error uploading file:", error.response?.data || error);
+    } catch {
+      setResponse("Error uploading file:");
     }
   };
 
   const fetchdata = async () => {
     try {
       const res = await axiosInstance.get(`/resume/resumes`);
-      // console.log(res.data);
 
       if (!res.data?.data || res.data.data.length === 0) {
-        setResponse(""); // no resume found
+        setResponse(""); 
       } else {
-        setResponse(res.data.data.profile); // adjust based on API shape
+        setResponse(res.data.data.profile);
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch {
       setResponse("Error fetching data");
     }
   };
