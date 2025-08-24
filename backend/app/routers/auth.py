@@ -56,7 +56,15 @@ async def login(token: Token, response: Response):
 
         users_collection.update_one(
             {"firebase_uid": uid},
-            {"$set": {"last_login": datetime.now()}},
+            {
+                "$set": {"last_login": datetime.now()},
+                "$setOnInsert": {
+                    "firebase_uid": uid,
+                    "email": email,
+                    "provider": provider,
+                    "created_at": datetime.now()
+                }
+            },
             upsert=True
         )
 
