@@ -218,7 +218,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
           }}
         >
           {/* Login Form */}
-          <div className="absolute w-full h-auto bg-white rounded-xl shadow-xl p-8 backface-hidden flex flex-col justify-center">
+          <div className="absolute w-full h-full bg-white rounded-xl shadow-xl p-8 backface-hidden flex flex-col justify-center pb-20">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
               Welcome Back!
             </h2>
@@ -324,6 +324,7 @@ export default function Auth({ isLogin: initialIsLogin = true }) {
               </button>
             </p>
           </div>
+          
 
           {/* Signup Form */}
           <div className="absolute w-full h-full bg-white rounded-xl shadow-xl p-8 backface-hidden transform rotate-y-180 flex flex-col justify-center">
