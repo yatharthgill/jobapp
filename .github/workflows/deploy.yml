@@ -1,31 +1,31 @@
-# name: Scrapyd Deploy
+name: Scrapyd Deploy
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-#       - name: Install dependencies
-#         working-directory: ./newscraper
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install -r requirements.txt
-#           pip install scrapyd-client
+      - name: Install dependencies
+        working-directory: ./newscraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install scrapyd-client
 
-#       - name: Deploy to Scrapyd
-#         working-directory: ./newscraper/jobscrapper
-#         run: |
-#           scrapyd-deploy jobscrapper
+      - name: Deploy to Scrapyd
+        working-directory: ./newscraper/jobscrapper
+        run: |
+          scrapyd-deploy jobscrapper
