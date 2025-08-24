@@ -11,7 +11,7 @@ import {
   FiBriefcase,
   FiEdit,
   FiMapPin,
-  FiFolder, // Added new icon for Projects
+  FiFolder, 
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import axiosInstance from "@/axiosInstance";
@@ -171,9 +171,9 @@ const Profile = () => {
               <div className="flex flex-wrap gap-2">
                 {profile.skills &&
                   (Array.isArray(profile.skills)
-                    ? profile.skills // case 1: plain array
+                    ? profile.skills
                     : Object.values(profile.skills).flat()
-                  ) // case 2: object of arrays
+                  ) 
                     .map((skill) => <SkillTag key={skill} skill={skill} />)}
               </div>
             </Section>
@@ -231,7 +231,6 @@ const Section = ({ icon, title, children }) => (
   </motion.section>
 );
 
-// --- NEW COMPONENT FOR EXPERIENCE ---
 const ExperienceCard = ({ experience }) => (
   <motion.div
     whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
