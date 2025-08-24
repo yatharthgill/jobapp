@@ -9,7 +9,6 @@ router = APIRouter()
 async def start_scrape(job: JobIn , current_user: dict = Depends(get_current_user)):
     spiders = ["linkedin_jobs", "internshala_jobs"]
     user_id = current_user.get("firebase_uid")
-    print("userid",user_id)
     tasks = [
         schedule_scrape(
             project="jobscrapper",
