@@ -35,7 +35,7 @@ export const Navbar = ({
     (<motion.div
       ref={ref}
       // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-      className={cn("sticky inset-x-0 top-3 z-40 w-full h-20", className)}>
+      className={cn("sticky inset-x-0 top-4 z-40 w-full h-20", className)}>
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
           ? React.cloneElement(child, { visible })
@@ -95,7 +95,7 @@ export const NavItems = ({
         <Link
           onMouseEnter={() => setHovered(idx)}
           onClick={onItemClick}
-          className="relative px-4 py-2 text-neutral-600 "
+          className="relative px-4 py-2 text-neutral-600 hover:text-blue-500"
           key={`link-${idx}`}
           to={item.link}>
           {hovered === idx && (

@@ -80,6 +80,8 @@ const CircularProgress = ({ score }) => {
       </svg>
       <div className="absolute flex flex-col items-center justify-center">
         <span className="text-3xl font-bold text-gray-900">{displayScore}</span>
+      </div>
+      <div className="mt-24 absolute flex flex-col items-center justify-center">
         <span className="text-xs text-gray-500">Match Score</span>
       </div>
     </div>
@@ -147,28 +149,20 @@ export default function App() {
       setError(null);
       try {
         // GET ATS score
-        const response_ats = await axiosInstance.get(
-          "/ats/score"
-        );
-        if(response_ats.data.success){
-        setAtsResult(response_ats.data.data)
-        }
-
-        else{
-            setAtsResult("")
+        const response_ats = await axiosInstance.get("/ats/score");
+        if (response_ats.data.success) {
+          setAtsResult(response_ats.data.data);
+        } else {
+          setAtsResult("");
         }
 
         // GET suggestions
-        const response_suggestions = await axiosInstance.get(
-          "/ats/suggest"
-        );
-        if(response_suggestions.data.success){
-        setSuggestions(response_suggestions.data.data.suggestions);
+        const response_suggestions = await axiosInstance.get("/ats/suggest");
+        if (response_suggestions.data.success) {
+          setSuggestions(response_suggestions.data.data.suggestions);
+        } else {
+          setSuggestions("");
         }
-        else{
-            setSuggestions("")
-        }
-
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -188,10 +182,9 @@ export default function App() {
     setError(null);
     setAtsResult(null);
     try {
-      const response = await axiosInstance.post(
-        "/ats/score",
-        { job_description: jobDescription }
-      );
+      const response = await axiosInstance.post("/ats/score", {
+        job_description: jobDescription,
+      });
       setAtsResult(response.data.data);
     } catch (err) {
       setError(
@@ -209,9 +202,7 @@ export default function App() {
     setError(null);
     setSuggestions(null);
     try {
-      const response = await axiosInstance.post(
-        "/ats/suggest"
-      );
+      const response = await axiosInstance.post("/ats/suggest");
       setSuggestions(response.data.data.suggestions);
     } catch (err) {
       setError(

@@ -26,6 +26,7 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.540.0",
     "motion": "^12.23.12",
+    "ogl": "^1.0.11",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-dropzone": "^14.3.8",
