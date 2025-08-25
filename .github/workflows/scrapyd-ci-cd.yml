@@ -5,17 +5,13 @@ on:
     branches:
       - main
   schedule:
-    - cron: "*/10 * * * *"   # base trigger every 10 minutes
+    - cron: "*/14 * * * *"   # trigger every 14 minutes
   workflow_dispatch:          # allow manual run
 
 jobs:
   deploy_and_ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Random sleep before start (schedule only)
-        if: github.event_name == 'schedule'
-        run: sleep $(( RANDOM % 300 ))   # 0–300 sec (up to 5 min)
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
