@@ -161,7 +161,7 @@ const handleSubmit = async (e) => {
 
   try {
     const savePromise = axiosInstance.put(
-      "http://localhost:8000/profiles/update",
+      "/profiles/update",
       formData
     );
 
