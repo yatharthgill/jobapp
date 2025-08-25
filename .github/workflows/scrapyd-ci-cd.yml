@@ -1,0 +1,43 @@
+name: Scrapyd CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "*/10 * * * *"   # base trigger every 10 minutes
+  workflow_dispatch:          # allow manual run
+
+jobs:
+  deploy_and_ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Random sleep before start (schedule only)
+        if: github.event_name == 'schedule'
+        run: sleep $(( RANDOM % 300 ))   # 0–300 sec (up to 5 min)
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./newscraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install scrapyd-client
+
+      - name: Deploy to Scrapyd
+        working-directory: ./newscraper/jobscrapper
+        run: |
+          scrapyd-deploy jobscrappername
+
+      - name: Ping Scrapyd Backends
+        run: |
+          echo "Pinging Scrapyd at $(date)"
+          curl -s https://jobapp-backend-25kl.onrender.com/ || echo "Ping to jobapp-backend failed"
+          curl -s https://jobapp-bah2.onrender.com/daemonstatus.json || echo "Ping to jobapp-bah2 failed"
