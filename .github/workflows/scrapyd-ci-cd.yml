@@ -34,7 +34,7 @@ jobs:
       - name: Deploy to Scrapyd
         working-directory: ./newscraper/jobscrapper
         run: |
-          scrapyd-deploy jobscrappername
+          scrapyd-deploy jobscrapper
 
       - name: Ping Scrapyd Backends
         run: |
