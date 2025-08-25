@@ -11,8 +11,9 @@ import {
   FiBriefcase,
   FiEdit,
   FiMapPin,
-  FiFolder, 
+  FiFolder,
 } from "react-icons/fi";
+import { FaUserCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import axiosInstance from "@/axiosInstance";
 import { EditProfileModal } from "@/components/EditProfileModal";
@@ -30,9 +31,7 @@ const Profile = () => {
 
   const fetchProfileData = async () => {
     try {
-      const response = await axiosInstance.get(
-        "/profiles/me"
-      );
+      const response = await axiosInstance.get("/profiles/me");
       if (!response) {
         throw new Error("Network response was not ok");
       }
@@ -91,11 +90,16 @@ const Profile = () => {
           transition={{ duration: 0.5 }}
           className="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 relative"
         >
-          <img
-            src={profile.profile_picture || githubInfo?.avatar_url}
-            alt={`${profile.first_name}'s profile`}
-            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
-          />
+          {profile.profile_picture || githubInfo?.avatar_url ? (
+            <img
+              src={profile.profile_picture || githubInfo?.avatar_url}
+              alt={`${profile.first_name || "User"}'s profile`}
+              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
+            />
+          ) : (
+            <FaUserCircle className="w-32 h-32 text-gray-400" />
+          )}
+
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-4xl font-extrabold text-gray-800">
               {profile.first_name} {profile.last_name}
@@ -173,8 +177,7 @@ const Profile = () => {
                   (Array.isArray(profile.skills)
                     ? profile.skills
                     : Object.values(profile.skills).flat()
-                  ) 
-                    .map((skill) => <SkillTag key={skill} skill={skill} />)}
+                  ).map((skill) => <SkillTag key={skill} skill={skill} />)}
               </div>
             </Section>
             <Section icon={<FiAward />} title="Certifications">
