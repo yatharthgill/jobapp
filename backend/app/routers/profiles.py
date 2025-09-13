@@ -82,7 +82,7 @@ async def create_profile(
         languages, education, created_at, updated_at.
         """
         groq_response = await get_groq_response(groq_prompt)
-        print(groq_response)
+        # print(groq_response)
 
         try:
             match = re.search(r"```json\s*(.*?)```", groq_response, re.DOTALL)
