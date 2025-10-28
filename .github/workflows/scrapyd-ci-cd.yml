@@ -37,3 +37,7 @@ jobs:
           echo "Pinging Scrapyd at $(date)"
           curl -s https://jobapp-backend-25kl.onrender.com/ || echo "Ping to jobapp-backend failed"
           curl -s https://jobapp-bah2.onrender.com/daemonstatus.json || echo "Ping to jobapp-bah2 failed"
+          curl -s https://workoutbuddy-9nqn.onrender.com/ || echo "Ping to workoutBuddy-backend failed"
+          curl -s https://workoutbuddyfrontend-kn9e.onrender.com/ || echo "Ping to workoutBuddy-Frontend failed"
+          
+
